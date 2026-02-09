@@ -1,0 +1,40 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  username String @unique
+  password String
+  role     String // "ADMIN" or "AGENT"
+}
+
+model PollingStation {
+  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  psNumber     String @unique
+  psName       String
+  inchargeName String
+  houses       House[]
+}
+
+model House {
+  id               String         @id @default(auto()) @map("_id") @db.ObjectId
+  houseNumber      String
+  totalVoters      Int
+  pollingStationId String         @db.ObjectId
+  pollingStation   PollingStation @relation(fields: [pollingStationId], references: [id])
+  voters           Voter[]
+}
+
+model Voter {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  voterNumber Int
+  met         Boolean @default(false)
+  houseId     String  @db.ObjectId
+  house       House   @relation(fields: [houseId], references: [id])
+}
