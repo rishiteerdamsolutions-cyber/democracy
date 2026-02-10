@@ -79,7 +79,7 @@ export async function GET(
         totalVoters,
         votersMet,
         completionPercentage:
-          totalVoters > 0 ? Math.round((votersMet / totalVoters) * 100) : 0,
+          totalVoters > 0 ? Math.round((votersMet / totalVoters) * 1000) / 10 : 0,
       },
     });
   } catch (error) {

@@ -58,7 +58,7 @@ export async function GET() {
         votersMet,
         votersNotMet: totalVoters - votersMet,
         completionPercentage:
-          totalVoters > 0 ? Math.round((votersMet / totalVoters) * 100) : 0,
+          totalVoters > 0 ? Math.round((votersMet / totalVoters) * 1000) / 10 : 0,
       };
     });
 
@@ -76,7 +76,7 @@ export async function GET() {
         votersNotMet: overallTotalVoters - overallVotersMet,
         completionPercentage:
           overallTotalVoters > 0
-            ? Math.round((overallVotersMet / overallTotalVoters) * 100)
+            ? Math.round((overallVotersMet / overallTotalVoters) * 1000) / 10
             : 0,
       },
     });

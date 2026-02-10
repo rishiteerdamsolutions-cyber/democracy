@@ -121,7 +121,7 @@ export default function AgentPSPage() {
           housesCompleted,
           completionPercentage:
             prev.stats.totalVoters > 0
-              ? Math.round((totalVotersMet / prev.stats.totalVoters) * 100)
+              ? Math.round((totalVotersMet / prev.stats.totalVoters) * 1000) / 10
               : 0,
         },
       };
