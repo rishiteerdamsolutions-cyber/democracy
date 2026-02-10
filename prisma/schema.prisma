@@ -18,7 +18,9 @@ model PollingStation {
   id           String @id @default(auto()) @map("_id") @db.ObjectId
   psNumber     String @unique
   psName       String
-  inchargeName String
+  roomNumber   String
+  wardNumber   String
+  inchargeName String @default("")
   houses       House[]
 }
 
@@ -32,9 +34,9 @@ model House {
 }
 
 model Voter {
-  id          String  @id @default(auto()) @map("_id") @db.ObjectId
-  voterNumber Int
-  met         Boolean @default(false)
-  houseId     String  @db.ObjectId
-  house       House   @relation(fields: [houseId], references: [id])
+  id           String  @id @default(auto()) @map("_id") @db.ObjectId
+  serialNumber Int
+  met          Boolean @default(false)
+  houseId      String  @db.ObjectId
+  house        House   @relation(fields: [houseId], references: [id])
 }

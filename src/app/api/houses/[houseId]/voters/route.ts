@@ -42,7 +42,7 @@ export async function PUT(
     const updated = await prisma.house.findUnique({
       where: { id: houseId },
       include: {
-        voters: { orderBy: { voterNumber: "asc" } },
+        voters: { orderBy: { serialNumber: "asc" } },
       },
     });
 
@@ -61,7 +61,7 @@ export async function PUT(
       status,
       voters: updated!.voters.map((v) => ({
         id: v.id,
-        voterNumber: v.voterNumber,
+        serialNumber: v.serialNumber,
         met: v.met,
       })),
     });

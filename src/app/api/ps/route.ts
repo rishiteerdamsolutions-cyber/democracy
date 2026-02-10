@@ -47,6 +47,8 @@ export async function GET() {
         id: ps.id,
         psNumber: ps.psNumber,
         psName: ps.psName,
+        roomNumber: ps.roomNumber,
+        wardNumber: ps.wardNumber,
         inchargeName: ps.inchargeName,
         totalHouses,
         housesCompleted,
@@ -60,7 +62,10 @@ export async function GET() {
       };
     });
 
+    const wardNumber = stations.length > 0 ? stations[0].wardNumber : "";
+
     return NextResponse.json({
+      wardNumber,
       stations: result,
       overall: {
         totalStations: stations.length,

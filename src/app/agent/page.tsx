@@ -7,6 +7,8 @@ interface PS {
   id: string;
   psNumber: string;
   psName: string;
+  roomNumber: string;
+  wardNumber: string;
   inchargeName: string;
   totalHouses: number;
   housesCompleted: number;
@@ -18,6 +20,7 @@ interface PS {
 export default function AgentSelectPS() {
   const router = useRouter();
   const [stations, setStations] = useState<PS[]>([]);
+  const [wardNumber, setWardNumber] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,6 +28,7 @@ export default function AgentSelectPS() {
       .then((r) => r.json())
       .then((data) => {
         setStations(data.stations || []);
+        setWardNumber(data.wardNumber || "");
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -50,7 +54,9 @@ export default function AgentSelectPS() {
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-gray-900">Democracy</h1>
-            <p className="text-sm text-gray-500">Select a Polling Station</p>
+            <p className="text-sm text-gray-500">
+              Ward {wardNumber} — Select a Polling Station
+            </p>
           </div>
           <button
             onClick={handleLogout}
@@ -78,12 +84,18 @@ export default function AgentSelectPS() {
                   {ps.completionPercentage}%
                 </span>
               </div>
-              <h3 className="font-semibold text-gray-900 text-sm mb-1">
+              <h3 className="font-semibold text-gray-900 text-sm mb-0.5">
                 {ps.psName}
               </h3>
-              <p className="text-xs text-gray-500 mb-3">
-                Incharge: {ps.inchargeName}
+              <p className="text-xs text-gray-500 mb-1">
+                Room {ps.roomNumber}
               </p>
+              {ps.inchargeName && (
+                <p className="text-xs text-gray-400 mb-3">
+                  Incharge: {ps.inchargeName}
+                </p>
+              )}
+              {!ps.inchargeName && <div className="mb-3" />}
               {/* Progress bar */}
               <div className="w-full bg-gray-100 rounded-full h-2">
                 <div

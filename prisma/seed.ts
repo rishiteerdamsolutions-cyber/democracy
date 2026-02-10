@@ -1,218 +1,145 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import Database from "better-sqlite3";
+import path from "path";
 
 const prisma = new PrismaClient();
 
-const PS_DATA = [
-  {
-    psNumber: "295",
-    psName: "Mettuguda Primary School",
-    inchargeName: "Ramesh Kumar",
-    houses: [
-      { houseNumber: "1-1-101", voters: 5 },
-      { houseNumber: "1-1-102", voters: 3 },
-      { houseNumber: "1-1-103", voters: 7 },
-      { houseNumber: "1-1-104", voters: 4 },
-      { houseNumber: "1-1-105", voters: 6 },
-      { houseNumber: "1-1-106", voters: 8 },
-      { houseNumber: "1-1-107", voters: 3 },
-      { houseNumber: "1-1-108", voters: 5 },
-      { houseNumber: "1-1-109", voters: 4 },
-      { houseNumber: "1-1-110", voters: 6 },
-      { houseNumber: "1-1-111", voters: 9 },
-      { houseNumber: "1-1-112", voters: 4 },
-    ],
-  },
-  {
-    psNumber: "296",
-    psName: "Lalaguda Government School",
-    inchargeName: "Suresh Reddy",
-    houses: [
-      { houseNumber: "2-3-201", voters: 6 },
-      { houseNumber: "2-3-202", voters: 4 },
-      { houseNumber: "2-3-203", voters: 8 },
-      { houseNumber: "2-3-204", voters: 5 },
-      { houseNumber: "2-3-205", voters: 3 },
-      { houseNumber: "2-3-206", voters: 7 },
-      { houseNumber: "2-3-207", voters: 4 },
-      { houseNumber: "2-3-208", voters: 6 },
-      { houseNumber: "2-3-209", voters: 5 },
-      { houseNumber: "2-3-210", voters: 9 },
-      { houseNumber: "2-3-211", voters: 3 },
-      { houseNumber: "2-3-212", voters: 7 },
-      { houseNumber: "2-3-213", voters: 4 },
-      { houseNumber: "2-3-214", voters: 5 },
-      { houseNumber: "2-3-215", voters: 8 },
-    ],
-  },
-  {
-    psNumber: "297",
-    psName: "Chilkalguda Community Hall",
-    inchargeName: "Venkat Rao",
-    houses: [
-      { houseNumber: "3-5-301", voters: 4 },
-      { houseNumber: "3-5-302", voters: 7 },
-      { houseNumber: "3-5-303", voters: 5 },
-      { houseNumber: "3-5-304", voters: 6 },
-      { houseNumber: "3-5-305", voters: 3 },
-      { houseNumber: "3-5-306", voters: 8 },
-      { houseNumber: "3-5-307", voters: 5 },
-      { houseNumber: "3-5-308", voters: 4 },
-      { houseNumber: "3-5-309", voters: 7 },
-      { houseNumber: "3-5-310", voters: 6 },
-    ],
-  },
-  {
-    psNumber: "298",
-    psName: "Bhoiguda Municipal School",
-    inchargeName: "Lakshmi Devi",
-    houses: [
-      { houseNumber: "4-1-401", voters: 5 },
-      { houseNumber: "4-1-402", voters: 3 },
-      { houseNumber: "4-1-403", voters: 7 },
-      { houseNumber: "4-1-404", voters: 4 },
-      { houseNumber: "4-1-405", voters: 6 },
-      { houseNumber: "4-1-406", voters: 8 },
-      { houseNumber: "4-1-407", voters: 5 },
-      { houseNumber: "4-1-408", voters: 3 },
-      { houseNumber: "4-1-409", voters: 6 },
-      { houseNumber: "4-1-410", voters: 4 },
-      { houseNumber: "4-1-411", voters: 7 },
-      { houseNumber: "4-1-412", voters: 5 },
-      { houseNumber: "4-1-413", voters: 9 },
-      { houseNumber: "4-1-414", voters: 4 },
-      { houseNumber: "4-1-415", voters: 6 },
-      { houseNumber: "4-1-416", voters: 3 },
-      { houseNumber: "4-1-417", voters: 7 },
-      { houseNumber: "4-1-418", voters: 5 },
-    ],
-  },
-  {
-    psNumber: "299",
-    psName: "Tarnaka Government School",
-    inchargeName: "Srinivas Murthy",
-    houses: [
-      { houseNumber: "5-2-501", voters: 6 },
-      { houseNumber: "5-2-502", voters: 4 },
-      { houseNumber: "5-2-503", voters: 8 },
-      { houseNumber: "5-2-504", voters: 5 },
-      { houseNumber: "5-2-505", voters: 3 },
-      { houseNumber: "5-2-506", voters: 7 },
-      { houseNumber: "5-2-507", voters: 4 },
-      { houseNumber: "5-2-508", voters: 6 },
-      { houseNumber: "5-2-509", voters: 5 },
-      { houseNumber: "5-2-510", voters: 9 },
-      { houseNumber: "5-2-511", voters: 3 },
-      { houseNumber: "5-2-512", voters: 7 },
-      { houseNumber: "5-2-513", voters: 4 },
-      { houseNumber: "5-2-514", voters: 5 },
-    ],
-  },
-  {
-    psNumber: "300",
-    psName: "Vidyanagar Community Hall",
-    inchargeName: "Priya Sharma",
-    houses: [
-      { houseNumber: "6-4-601", voters: 5 },
-      { houseNumber: "6-4-602", voters: 7 },
-      { houseNumber: "6-4-603", voters: 4 },
-      { houseNumber: "6-4-604", voters: 6 },
-      { houseNumber: "6-4-605", voters: 3 },
-      { houseNumber: "6-4-606", voters: 8 },
-      { houseNumber: "6-4-607", voters: 5 },
-      { houseNumber: "6-4-608", voters: 4 },
-      { houseNumber: "6-4-609", voters: 7 },
-      { houseNumber: "6-4-610", voters: 6 },
-      { houseNumber: "6-4-611", voters: 9 },
-    ],
-  },
-  {
-    psNumber: "301",
-    psName: "Nacharam Primary School",
-    inchargeName: "Mahesh Babu",
-    houses: [
-      { houseNumber: "7-6-701", voters: 4 },
-      { houseNumber: "7-6-702", voters: 6 },
-      { houseNumber: "7-6-703", voters: 5 },
-      { houseNumber: "7-6-704", voters: 7 },
-      { houseNumber: "7-6-705", voters: 3 },
-      { houseNumber: "7-6-706", voters: 8 },
-      { houseNumber: "7-6-707", voters: 4 },
-      { houseNumber: "7-6-708", voters: 6 },
-      { houseNumber: "7-6-709", voters: 5 },
-      { houseNumber: "7-6-710", voters: 9 },
-      { houseNumber: "7-6-711", voters: 3 },
-      { houseNumber: "7-6-712", voters: 7 },
-      { houseNumber: "7-6-713", voters: 4 },
-      { houseNumber: "7-6-714", voters: 5 },
-      { houseNumber: "7-6-715", voters: 6 },
-      { houseNumber: "7-6-716", voters: 8 },
-    ],
-  },
-];
+// Path to the consolidated SQLite database
+const SQLITE_PATH = path.resolve(
+  __dirname,
+  "../../output/NEW/data-2.db"
+);
+
+interface VoterRow {
+  serial_number: string;
+  house_number: string;
+  source_ps_number: string;
+  source_ps_name: string;
+  source_room_number: string;
+}
+
+interface PSInfoRow {
+  ward_number: string;
+}
 
 async function main() {
-  console.log("Seeding database...");
+  console.log("Opening SQLite database:", SQLITE_PATH);
+  const db = new Database(SQLITE_PATH, { readonly: true });
 
-  // Clear existing data
+  // Get ward number from ps_info table
+  const psInfo = db
+    .prepare("SELECT ward_number FROM ps_info LIMIT 1")
+    .get() as PSInfoRow | undefined;
+  const wardNumber = psInfo?.ward_number || "";
+  console.log("Ward:", wardNumber);
+
+  // Read all voters ordered by PS, house, serial number
+  const voters = db
+    .prepare(
+      `SELECT serial_number, house_number, source_ps_number, source_ps_name, source_room_number
+       FROM voter_blocks
+       ORDER BY source_ps_number, house_number, CAST(serial_number AS INTEGER)`
+    )
+    .all() as VoterRow[];
+
+  console.log(`Total voters in SQLite: ${voters.length}`);
+
+  db.close();
+
+  // Group voters by PS, then by house
+  const psMap = new Map<
+    string,
+    {
+      psNumber: string;
+      psName: string;
+      roomNumber: string;
+      houses: Map<string, number[]>; // houseNumber -> [serialNumbers]
+    }
+  >();
+
+  for (const v of voters) {
+    if (!psMap.has(v.source_ps_number)) {
+      psMap.set(v.source_ps_number, {
+        psNumber: v.source_ps_number,
+        psName: v.source_ps_name || "",
+        roomNumber: v.source_room_number || "",
+        houses: new Map(),
+      });
+    }
+    const ps = psMap.get(v.source_ps_number)!;
+    // Skip voters with empty/invalid serial numbers
+    const sn = parseInt(v.serial_number, 10);
+    if (isNaN(sn)) continue;
+
+    const houseNum = v.house_number && v.house_number.trim() !== "" ? v.house_number : "UNKNOWN";
+    if (!ps.houses.has(houseNum)) {
+      ps.houses.set(houseNum, []);
+    }
+    ps.houses.get(houseNum)!.push(sn);
+  }
+
+  // Clear existing MongoDB data
+  console.log("\nClearing existing MongoDB data...");
   await prisma.voter.deleteMany();
   await prisma.house.deleteMany();
   await prisma.pollingStation.deleteMany();
   await prisma.user.deleteMany();
 
   // Create users
-  const adminPassword = await bcrypt.hash("admin123", 10);
-  const agentPassword = await bcrypt.hash("agent123", 10);
-
+  const adminPass = await bcrypt.hash("admin123", 10);
+  const agentPass = await bcrypt.hash("agent123", 10);
   await prisma.user.create({
-    data: { username: "admin", password: adminPassword, role: "ADMIN" },
+    data: { username: "admin", password: adminPass, role: "ADMIN" },
   });
   await prisma.user.create({
-    data: { username: "agent", password: agentPassword, role: "AGENT" },
+    data: { username: "agent", password: agentPass, role: "AGENT" },
   });
-  console.log("  Users created: admin / admin123, agent / agent123");
+  console.log("Users created: admin / admin123, agent / agent123");
 
-  // Create polling stations with houses and voters
+  // Create polling stations, houses, and voters
   let totalHouses = 0;
   let totalVoters = 0;
 
-  for (const ps of PS_DATA) {
+  for (const [, psData] of psMap) {
     const station = await prisma.pollingStation.create({
       data: {
-        psNumber: ps.psNumber,
-        psName: ps.psName,
-        inchargeName: ps.inchargeName,
+        psNumber: psData.psNumber,
+        psName: psData.psName,
+        roomNumber: psData.roomNumber,
+        wardNumber: wardNumber,
+        inchargeName: "",
       },
     });
 
-    for (const h of ps.houses) {
+    for (const [houseNum, serialNumbers] of psData.houses) {
       const house = await prisma.house.create({
         data: {
-          houseNumber: h.houseNumber,
-          totalVoters: h.voters,
+          houseNumber: houseNum,
+          totalVoters: serialNumbers.length,
           pollingStationId: station.id,
         },
       });
 
-      const voterData = Array.from({ length: h.voters }, (_, i) => ({
-        voterNumber: i + 1,
-        met: false,
-        houseId: house.id,
-      }));
-
-      await prisma.voter.createMany({ data: voterData });
+      await prisma.voter.createMany({
+        data: serialNumbers.map((sn) => ({
+          serialNumber: sn,
+          met: false,
+          houseId: house.id,
+        })),
+      });
 
       totalHouses++;
-      totalVoters += h.voters;
+      totalVoters += serialNumbers.length;
     }
 
     console.log(
-      `  PS ${ps.psNumber} — ${ps.psName}: ${ps.houses.length} houses`
+      `  PS ${psData.psNumber} — ${psData.psName} (Room ${psData.roomNumber}): ${psData.houses.size} houses`
     );
   }
 
   console.log(
-    `\nSeed complete: ${PS_DATA.length} PS, ${totalHouses} houses, ${totalVoters} voters`
+    `\nSeed complete: ${psMap.size} PS, ${totalHouses} houses, ${totalVoters} voters`
   );
 }
 
