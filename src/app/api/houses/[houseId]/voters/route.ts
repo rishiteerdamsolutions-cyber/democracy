@@ -29,9 +29,21 @@ export async function PUT(
       );
     }
 
-    // Update each voter
+    // Build a map of current voter states for quick lookup
+    const currentVoterMap = new Map(
+      house.voters.map((v) => [v.id, v.met])
+    );
+
+    // Update each voter — NEVER allow unchecking a saved voter
     for (const v of voters) {
       if (typeof v.id !== "string" || typeof v.met !== "boolean") continue;
+
+      const currentlyMet = currentVoterMap.get(v.id);
+      // Skip: already met in DB, cannot be unchecked
+      if (currentlyMet === true && v.met === false) continue;
+      // Skip: no change
+      if (currentlyMet === v.met) continue;
+
       await prisma.voter.update({
         where: { id: v.id },
         data: { met: v.met },

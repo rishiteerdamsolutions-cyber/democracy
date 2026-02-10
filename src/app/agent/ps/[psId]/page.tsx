@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 
 interface Voter {
@@ -69,12 +69,26 @@ export default function AgentPSPage() {
   const [dirtyHouses, setDirtyHouses] = useState<Set<string>>(new Set());
   const [savingHouses, setSavingHouses] = useState<Set<string>>(new Set());
 
+  // Track voters that are saved as met on the server — these are LOCKED
+  const lockedVoters = useRef<Set<string>>(new Set());
+
   const fetchData = useCallback(async () => {
     try {
       const res = await fetch(`/api/ps/${psId}`);
       if (!res.ok) throw new Error("Failed to fetch");
-      const data = await res.json();
+      const data: PSData = await res.json();
       setPsData(data);
+
+      // Lock all voters that are already met in the database
+      const locked = new Set<string>();
+      for (const house of data.houses) {
+        for (const voter of house.voters) {
+          if (voter.met) {
+            locked.add(voter.id);
+          }
+        }
+      }
+      lockedVoters.current = locked;
     } catch {
       console.error("Failed to load PS data");
     } finally {
@@ -88,6 +102,12 @@ export default function AgentPSPage() {
 
   const toggleVoter = (houseIndex: number, voterIndex: number) => {
     if (!psData) return;
+
+    const voter = psData.houses[houseIndex].voters[voterIndex];
+
+    // LOCKED: already saved as met — cannot uncheck
+    if (lockedVoters.current.has(voter.id)) return;
+
     setPsData((prev) => {
       if (!prev) return prev;
       const houses = [...prev.houses];
@@ -150,6 +170,13 @@ export default function AgentPSPage() {
       });
 
       if (res.ok) {
+        // Lock newly saved met voters
+        for (const voter of house.voters) {
+          if (voter.met) {
+            lockedVoters.current.add(voter.id);
+          }
+        }
+
         setDirtyHouses((prev) => {
           const next = new Set(prev);
           next.delete(houseId);
@@ -303,26 +330,46 @@ export default function AgentPSPage() {
 
               {/* Voter Checkboxes — Horizontal */}
               <div className="flex flex-wrap gap-2 mb-3">
-                {house.voters.map((voter, voterIdx) => (
-                  <label
-                    key={voter.id}
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border cursor-pointer select-none transition ${
-                      voter.met
-                        ? "bg-green-50 border-green-300 text-green-800"
-                        : "bg-gray-50 border-gray-200 text-gray-600 hover:border-gray-300"
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={voter.met}
-                      onChange={() => toggleVoter(houseIdx, voterIdx)}
-                      className="w-4 h-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
-                    />
-                    <span className="text-sm font-medium">
-                      {voter.serialNumber}
-                    </span>
-                  </label>
-                ))}
+                {house.voters.map((voter, voterIdx) => {
+                  const isLocked = lockedVoters.current.has(voter.id);
+
+                  return (
+                    <label
+                      key={voter.id}
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border select-none transition ${
+                        isLocked
+                          ? "bg-green-100 border-green-400 text-green-900 cursor-not-allowed opacity-75"
+                          : voter.met
+                          ? "bg-green-50 border-green-300 text-green-800 cursor-pointer"
+                          : "bg-gray-50 border-gray-200 text-gray-600 hover:border-gray-300 cursor-pointer"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={voter.met}
+                        onChange={() => toggleVoter(houseIdx, voterIdx)}
+                        disabled={isLocked}
+                        className="w-4 h-4 rounded border-gray-300 text-green-600 focus:ring-green-500 disabled:opacity-60"
+                      />
+                      <span className="text-sm font-medium">
+                        {voter.serialNumber}
+                      </span>
+                      {isLocked && (
+                        <svg
+                          className="w-3 h-3 text-green-700"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
+                    </label>
+                  );
+                })}
               </div>
 
               {/* Save Button */}
